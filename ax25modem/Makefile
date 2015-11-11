@@ -117,6 +117,7 @@ CSRC = $(STARTUPSRC) \
        $(CHIBIOS)/os/hal/lib/streams/memstreams.c \
        $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
        packet_queue.c \
+       crc.c \
        main.c
        
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global

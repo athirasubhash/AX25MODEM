@@ -7,4 +7,5 @@
 *.hex
 *.dmp
 *.bin
+*.list
 ax25modem/.dep/*
