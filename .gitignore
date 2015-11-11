@@ -1,0 +1,10 @@
+# All the files that will be compiled as a part of the 
+# ChibiOS executable
+*.o
+*.lst
+*.elf
+*.map
+*.hex
+*.dmp
+*.bin
+.dep/*
