@@ -5,6 +5,7 @@
 #include "chstreams.h"
 #include "chprintf.h"
 #include "packet_queue.h"
+#include "crc.h"
 
 /* DEFINITION OF FUNCTIONS */
 
@@ -331,5 +332,64 @@ void display_packet_queue(Queue* queue)
     chprintf(SD_TERMINAL, "Packet queue empty...\n");
 }
 
+/**
+ *  int frame_packet_bytes(Packet* pkt, char* bytes)
+ *
+ *  Frame the bytes in packet pkt into the character array - bytes and return
+ *  the total number of bytes framed into the bytes array.
+ *
+ *  Please note that bytes must have allocated atleast MAX_PACKET_BYTES.
+ *
+ *  Return -1 if there is an error, otherwise the number of bytes populated.
+ *
+ */
 
+int frame_packet_bytes(Packet* pkt, char* bytes)
+{
+  int retval = 0;
+  int n = 0;
+  unsigned short crc = 0x0000;
+
+  if (pkt == NULL) return -1;
+  memset(bytes, 0, MAX_PACKET_BYTES * sizeof(char));
+
+  /* Copy the destination field */
+  memcpy(bytes, pkt->destination_address, ADDRESS_LENGTH * sizeof(char));
+
+  /* Initialize return value */
+  retval = ADDRESS_LENGTH;
+
+  /* Copy the source field */
+  memcpy(bytes + retval, pkt->source_address, ADDRESS_LENGTH * sizeof(char));
+
+  /* Increment retval */
+  retval += ADDRESS_LENGTH;
+
+  /* If there are no digipeaters, then address extension bit should be set */
+  bytes[retval - 1] |= (pkt->num_digipeaters == 0) ? 0x01 : 0x00;
+
+  /* Populate digipeater fields */
+  for (n = 0; n < pkt->num_digipeaters; n++)
+  {
+    memcpy(bytes + retval , pkt->digipeaters[n], ADDRESS_LENGTH * sizeof(char));
+    retval += ADDRESS_LENGTH;
+    bytes[retval - 1] |= (n == (pkt->num_digipeaters - 1)) ? 0x01 : 0x00;
+  }
+
+  /* Copy the packet data payload */
+  if (pkt->payload_length > 0)
+  {
+    memcpy(bytes + retval, pkt->payload, pkt->payload_length * sizeof(char));
+    retval += pkt->payload_length;
+  }
+  
+  /* Compute Cyclic Redundancy Check (CRC) */
+  crc = calculate_packet_crc(bytes, retval);
+
+  /* Embed the CRC low byte first */
+  bytes[retval++] = (crc & 0xff);
+  bytes[retval++] = ((crc >> 8) & 0xff);
+
+  return retval;
+}
 

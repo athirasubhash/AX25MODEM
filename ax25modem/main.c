@@ -6,6 +6,7 @@
 #include "chstreams.h"
 #include "chprintf.h"
 #include "packet_queue.h"
+#include "crc.h"
 
 int main(void)
 {
@@ -17,6 +18,10 @@ int main(void)
   int i;
   int j;
   int rv;
+
+  /* Test vector for CRC, Correct CRC is 0x99D5 */
+  char crctest[] = {4, 1, 1, 71, 71};
+  unsigned short crc;
 
   /* HAL and RTOS Init Calls */
   halInit();
@@ -76,6 +81,10 @@ int main(void)
   chprintf(SD_TERMINAL, "Queue Status: %d, %d\n", 
     my_queue.front,
     my_queue.rear);
+
+  /* CRC Test */
+  crc = calculate_packet_crc(crctest, 5);
+  chprintf(SD_TERMINAL, "CRC : 0x%.4x\n", crc);
 
   while(1)
   {

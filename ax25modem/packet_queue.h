@@ -12,8 +12,10 @@
 #define MAX_DIGIPEATERS   8       /* Maximum number of digipeaters */
 #define ADDRESS_LENGTH    7       /* Number of characters in address field */
 #define PAYLOAD_LENGTH    256     /* Maximum size of packet payload */
-#define SD_TERMINAL_PORT  SD6
-#define SD_TERMINAL (BaseSequentialStream*)&SD_TERMINAL_PORT
+#define MAX_PACKET_BYTES  352     /* Maximum amount of bytes in a packet */
+#define SD_TERMINAL_PORT  SD6     /* Serial Device to direct the output */
+
+#define SD_TERMINAL       (BaseSequentialStream*)&SD_TERMINAL_PORT
 
 /* Packet Data Structure */
 typedef struct _Packet
@@ -71,6 +73,7 @@ int push_packet_to_queue(Queue*, Packet*);
 int pop_packet_from_queue(Queue*, Packet*);
 void display_packet(Packet*);
 void display_packet_queue(Queue*);
+int frame_packet_bytes(Packet*, char*);
 
 
 #endif
